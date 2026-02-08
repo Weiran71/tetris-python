@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>酷炫 Todo List</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #fff;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf, #e91e63);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientText 3s ease infinite;
+        }
+
+        @keyframes gradientText {
+            0%, 100% { background-position: 0% center; }
+            50% { background-position: 200% center; }
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        #todoInput {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        #todoInput::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        #todoInput:focus {
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        #addBtn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #addBtn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.4);
+        }
+
+        #addBtn:active {
+            transform: scale(0.95);
+        }
+
+        #addBtn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        #addBtn:hover::before {
+            left: 100%;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .stats span {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .stats .count {
+            color: #00d4ff;
+            font-weight: bold;
+        }
+
+        #todoList {
+            list-style: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        #todoList::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #todoList::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        #todoList::-webkit-scrollbar-thumb {
+            background: rgba(0, 212, 255, 0.5);
+            border-radius: 3px;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border-left: 4px solid #00d4ff;
+            transition: all 0.3s ease;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .todo-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .todo-item.completed {
+            border-left-color: #4caf50;
+            opacity: 0.6;
+        }
+
+        .todo-item.completed .todo-text {
+            text-decoration: line-through;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #00d4ff;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .checkbox:hover {
+            background: rgba(0, 212, 255, 0.2);
+        }
+
+        .todo-item.completed .checkbox {
+            background: #4caf50;
+            border-color: #4caf50;
+        }
+
+        .checkbox::after {
+            content: '✓';
+            color: #fff;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .todo-item.completed .checkbox::after {
+            opacity: 1;
+        }
+
+        .todo-text {
+            flex: 1;
+            color: #fff;
+            font-size: 1rem;
+            word-break: break-word;
+        }
+
+        .delete-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 50%;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delete-btn:hover {
+            background: rgba(233, 30, 99, 0.3);
+            color: #e91e63;
+            transform: rotate(90deg);
+        }
+
+        .todo-item.removing {
+            animation: slideOut 0.3s ease forwards;
+        }
+
+        @keyframes slideOut {
+            to {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .empty-state::before {
+            content: '📝';
+            display: block;
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        /* 粒子背景效果 */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: rgba(0, 212, 255, 0.5);
+            border-radius: 50%;
+            animation: float 15s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <h1>✨ Todo List</h1>
+
+        <div class="input-container">
+            <input type="text" id="todoInput" placeholder="添加新任务..." autocomplete="off">
+            <button id="addBtn">添加</button>
+        </div>
+
+        <div class="stats">
+            <span>总计: <span class="count" id="totalCount">0</span></span>
+            <span>已完成: <span class="count" id="completedCount">0</span></span>
+            <span>待完成: <span class="count" id="pendingCount">0</span></span>
+        </div>
+
+        <ul id="todoList">
+            <li class="empty-state">还没有任务，开始添加吧！</li>
+        </ul>
+    </div>
+
+    <script>
+        // 数据存储
+        let todos = JSON.parse(localStorage.getItem('todos')) || [];
+
+        // DOM 元素
+        const todoInput = document.getElementById('todoInput');
+        const addBtn = document.getElementById('addBtn');
+        const todoList = document.getElementById('todoList');
+        const totalCount = document.getElementById('totalCount');
+        const completedCount = document.getElementById('completedCount');
+        const pendingCount = document.getElementById('pendingCount');
+
+        // 创建粒子效果
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // 保存到 localStorage
+        function saveTodos() {
+            localStorage.setItem('todos', JSON.stringify(todos));
+        }
+
+        // 更新统计
+        function updateStats() {
+            const total = todos.length;
+            const completed = todos.filter(t => t.completed).length;
+            const pending = total - completed;
+
+            totalCount.textContent = total;
+            completedCount.textContent = completed;
+            pendingCount.textContent = pending;
+        }
+
+        // 渲染列表
+        function renderTodos() {
+            if (todos.length === 0) {
+                todoList.innerHTML = '<li class="empty-state">还没有任务，开始添加吧！</li>';
+            } else {
+                todoList.innerHTML = todos.map((todo, index) => `
+                    <li class="todo-item ${todo.completed ? 'completed' : ''}" data-index="${index}">
+                        <div class="checkbox" onclick="toggleTodo(${index})"></div>
+                        <span class="todo-text">${escapeHtml(todo.text)}</span>
+                        <button class="delete-btn" onclick="deleteTodo(${index})">×</button>
+                    </li>
+                `).join('');
+            }
+            updateStats();
+        }
+
+        // HTML 转义防止 XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 添加任务
+        function addTodo() {
+            const text = todoInput.value.trim();
+            if (text) {
+                todos.unshift({ text, completed: false });
+                saveTodos();
+                renderTodos();
+                todoInput.value = '';
+                todoInput.focus();
+            }
+        }
+
+        // 切换完成状态
+        function toggleTodo(index) {
+            todos[index].completed = !todos[index].completed;
+            saveTodos();
+            renderTodos();
+        }
+
+        // 删除任务
+        function deleteTodo(index) {
+            const item = todoList.querySelector(`[data-index="${index}"]`);
+            item.classList.add('removing');
+
+            setTimeout(() => {
+                todos.splice(index, 1);
+                saveTodos();
+                renderTodos();
+            }, 300);
+        }
+
+        // 事件监听
+        addBtn.addEventListener('click', addTodo);
+        todoInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addTodo();
+        });
+
+        // 初始化
+        createParticles();
+        renderTodos();
+    </script>
+</body>
+</html>
